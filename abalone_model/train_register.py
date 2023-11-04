@@ -19,10 +19,10 @@ boto_session = boto3.Session(region_name=region_name)
 sagemaker_client = boto_session.client(service_name="sagemaker")
 sagemaker_runtime_client = boto_session.client(service_name="sagemaker-runtime")
 sagemaker_session = sagemaker.Session(
-    boto_session = boto_session,
-    sagemaker_client = sagemaker_client,
-    sagemaker_runtime_client = sagemaker_runtime_client,
-    default_bucket = bucket
+    boto_session=boto_session,
+    sagemaker_client=sagemaker_client,
+    sagemaker_runtime_client=sagemaker_runtime_client,
+    default_bucket=bucket,
 )
 
 
@@ -31,26 +31,26 @@ train_set_location = f"s3://{bucket}/{model_name}/train/"
 validation_set_location = f"s3://{bucket}/{model_name}/validation/"
 model_location = f"s3://{bucket}/{model_name}/model/"
 
-train_set_pointer = TrainingInput(s3_data=train_set_location, content_type='libsvm')
-validation_set_pointer = TrainingInput(s3_data=validation_set_location, content_type='libsvm')
+train_set_pointer = TrainingInput(s3_data=train_set_location, content_type="libsvm")
+validation_set_pointer = TrainingInput(
+    s3_data=validation_set_location, content_type="libsvm"
+)
 
 # Retrieve xgboost image
 image_uri = sagemaker.image_uris.retrieve(
-    framework = "xgboost",
-    region = region_name,
-    version = "1.5-1"
+    framework="xgboost", region=region_name, version="1.5-1"
 )
 
 # Configure training estimator
 xgb_estimator = Estimator(
-    base_job_name = model_name,
-    image_uri = image_uri,
-    instance_type = "ml.m5.large",
-    instance_count = 1,
-    output_path = model_location,
-    sagemaker_session = sagemaker_session,
-    role = role_arn,
-    hyperparameters = {
+    base_job_name=model_name,
+    image_uri=image_uri,
+    instance_type="ml.m5.large",
+    instance_count=1,
+    output_path=model_location,
+    sagemaker_session=sagemaker_session,
+    role=role_arn,
+    hyperparameters={
         "objective": "reg:linear",
         "max_depth": 5,
         "eta": 0.2,
@@ -58,8 +58,8 @@ xgb_estimator = Estimator(
         "min_child_weight": 6,
         "subsample": 0.7,
         "verbosity": 2,
-        "num_round": 50,
-    }
+        "num_round": 40,
+    },
 )
 
 xgb_estimator.fit({"train": train_set_pointer, "validation": validation_set_pointer})
@@ -71,20 +71,20 @@ print("training_job_name:", training_job_name)
 # In this section, we push the newly trained model to the model registry,
 # so that we may subsequently refer to it during deployment.
 # Check if model_name already exists as a model group in the model registry
-matching_mpg = sagemaker_client.list_model_package_groups(
-    NameContains = model_name
-)['ModelPackageGroupSummaryList']
+matching_mpg = sagemaker_client.list_model_package_groups(NameContains=model_name)[
+    "ModelPackageGroupSummaryList"
+]
 
 if matching_mpg:
-    print(f'Using existing Model Package Group: {model_name}')
+    print(f"Using existing Model Package Group: {model_name}")
 else:
     mpg_input_dict = {
         "ModelPackageGroupName": model_name,
         "ModelPackageGroupDescription": model_description,
     }
     mpg_response = sagemaker_client.create_model_package_group(**mpg_input_dict)
-    mpg_arn = mpg_response['ModelPackageGroupArn']
-    print(f'Created new Model Package Group: {model_name}, ARN: {mpg_arn}')
+    mpg_arn = mpg_response["ModelPackageGroupArn"]
+    print(f"Created new Model Package Group: {model_name}, ARN: {mpg_arn}")
 
 
 # Retrieve model artifacts from training job
@@ -96,16 +96,13 @@ create_model_package_input_dict = {
     "ModelPackageDescription": "",
     "ModelApprovalStatus": "Approved",
     "InferenceSpecification": {
-        "Containers": [
-            {
-                "Image": image_uri,
-                "ModelDataUrl": model_artifacts
-            }
-        ],
-        "SupportedContentTypes": [ "text/csv" ],
-        "SupportedResponseMIMETypes": [ "text/csv" ]
-    }
+        "Containers": [{"Image": image_uri, "ModelDataUrl": model_artifacts}],
+        "SupportedContentTypes": ["text/csv"],
+        "SupportedResponseMIMETypes": ["text/csv"],
+    },
 }
 
-create_model_package_response = sagemaker_client.create_model_package(**create_model_package_input_dict)
+create_model_package_response = sagemaker_client.create_model_package(
+    **create_model_package_input_dict
+)
 print(f"Model Package version ARN: {create_model_package_response['ModelPackageArn']}")
