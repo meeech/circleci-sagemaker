@@ -58,7 +58,7 @@ xgb_estimator = Estimator(
         "min_child_weight": 6,
         "subsample": 0.7,
         "verbosity": 2,
-        "num_round": 40,
+        "num_round": 30,
     },
 )
 
