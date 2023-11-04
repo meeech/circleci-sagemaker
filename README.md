@@ -5,3 +5,8 @@ This is a demonstration of integrating Sagemaker with CircleCI to create an end-
 A walkthrough of the project can be found in [this Medium post](https://medium.com/@ticheung/machine-learning-ci-cd-with-circleci-and-aws-sagemaker-5ff67a0d937f).
 
 boop.
+
+NOTES:
+
+Make bucket circleci-sagemaker
+

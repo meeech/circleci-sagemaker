@@ -58,7 +58,7 @@ xgb_estimator = Estimator(
         "min_child_weight": 6,
         "subsample": 0.7,
         "verbosity": 2,
-        "num_round": 30,
+        "num_round": 40,
     },
 )
 
@@ -93,8 +93,8 @@ model_artifacts = xgb_estimator.model_data
 # Create pre-approved cross-account model package
 create_model_package_input_dict = {
     "ModelPackageGroupName": model_name,
-    "ModelPackageDescription": "",
-    "ModelApprovalStatus": "Approved",
+    "ModelPackageDescription": "Ths is to test non approved",
+    # "ModelApprovalStatus": "Approved",
     "InferenceSpecification": {
         "Containers": [{"Image": image_uri, "ModelDataUrl": model_artifacts}],
         "SupportedContentTypes": ["text/csv"],
