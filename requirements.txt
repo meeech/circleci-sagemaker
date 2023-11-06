@@ -1,5 +1,6 @@
 awscliv2
+boto3
 numpy
 pandas
-boto3
+requests
 sagemaker
