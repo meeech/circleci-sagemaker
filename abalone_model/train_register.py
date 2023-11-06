@@ -94,7 +94,7 @@ model_artifacts = xgb_estimator.model_data
 create_model_package_input_dict = {
     "ModelPackageGroupName": model_name,
     "ModelPackageDescription": "Ths is to test non approved",
-    # "ModelApprovalStatus": "Approved",
+    "ModelApprovalStatus": "Approved",
     "InferenceSpecification": {
         "Containers": [{"Image": image_uri, "ModelDataUrl": model_artifacts}],
         "SupportedContentTypes": ["text/csv"],
