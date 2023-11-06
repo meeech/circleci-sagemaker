@@ -82,13 +82,13 @@ def upsert_release(
     data = {
         "command_id": "00000000-0000-0000-0000-000000000000",
         "component_slug": slug,
-        "detected_at": "2023-11-05T06:30:42.539Z",
+        "detected_at": "2023-11-06T012:30:42.539Z",
         "status": release_status,
         "steps": [
             {
                 "config": "string",
                 "number": 0,
-                "started_at": get_current_datetime(),
+                "started_at": "2023-11-05T06:31:42.540Z",  # get_current_datetime(),
                 "status": step_status,
                 "type": type,
             }
@@ -97,7 +97,7 @@ def upsert_release(
             "desired_replicas": 1,
             "images": current_version_image,
             "job_number": 7,
-            "name": current_version_name,
+            "name": "busy-bee-1.0.2",  # current_version_name,
             "pipeline_id": "fe37088f-9907-4172-b298-dfcbca78fb65",
             "workflow_id": "b9944239-8e68-448b-a7f9-d51e49deff8f",
         },
@@ -202,6 +202,9 @@ try:
     )
 # TODO better error handling!
 except requests.exceptions.HTTPError as err:
+    print(err)
+    raise
+
     if err.response.status_code == 400:
         # This is the create if it doesn't exist. Not perfect, but we infer from the 400
         # because we dont have a way for API to get this. just BFF
@@ -265,7 +268,7 @@ print(f"upsert_component {model_name}")
 upsert_component(
     slug=f"sagemaker.{model_name}",
     display_name=f"sagemaker.{model_name}",
-    current_version_name=f"{timed_model_name}-{create_model_response['ModelArn']}",
+    current_version_name=f"{timed_model_name}",
     current_version_image=endpoint_arn,
 )
 
