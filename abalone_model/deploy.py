@@ -270,7 +270,7 @@ print(f"upsert_component {model_name}")
 upsert_component(
     slug=f"sagemaker.{model_name}",
     display_name=f"sagemaker.{model_name}",
-    current_version_name={timed_model_name},
+    current_version_name=timed_model_name,
     current_version_image=endpoint_arn,
 )
 
