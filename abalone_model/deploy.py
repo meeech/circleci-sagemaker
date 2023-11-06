@@ -82,13 +82,13 @@ def upsert_release(
     data = {
         "command_id": "00000000-0000-0000-0000-000000000000",
         "component_slug": slug,
-        "detected_at": "2023-11-05T012:30:42.539Z",
+        "detected_at": "2023-11-05T12:30:42.539Z",
         "status": release_status,
         "steps": [
             {
                 "config": "string",
                 "number": 0,
-                "started_at": "2023-11-05T06:31:42.540Z",  # get_current_datetime(),
+                "started_at": "2023-11-05T02:49:42.540Z",  # get_current_datetime(),
                 "status": step_status,
                 "type": type,
             }
