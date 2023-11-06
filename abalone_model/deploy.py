@@ -11,7 +11,7 @@ from time import strftime, gmtime, sleep
 release_tracker_host = "https://internal.circleci.com/"
 release_tracker_headers = {
     "accept": "application/json",
-    "Authorization": os.getenv("CCI_INTEGRATION_TOKEN"),
+    "Authorization": os.environ["CCI_INTEGRATION_TOKEN"],
     "Content-Type": "application/json",
 }
 
