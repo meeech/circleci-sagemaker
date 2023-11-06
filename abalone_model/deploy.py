@@ -97,7 +97,7 @@ def upsert_release(
             "desired_replicas": 1,
             "images": current_version_image,
             "job_number": 7,
-            "name": "busy-bee-1.0.2",  # current_version_name,
+            "name": current_version_name,
             "pipeline_id": "fe37088f-9907-4172-b298-dfcbca78fb65",
             "workflow_id": "b9944239-8e68-448b-a7f9-d51e49deff8f",
         },
@@ -219,7 +219,7 @@ except requests.exceptions.HTTPError as err:
             slug=f"sagemaker.{model_name}",
             release_status="RUNNING",
             step_status="RUNNING",
-            type="WAITING_FOR_AVAILABILITY",
+            type="WAIT_FOR_AVAILABILITY",
             current_version_name=f"{model_name}",
             current_version_image=[f"modelArn: {create_model_response['ModelArn']}"],
         )
@@ -256,7 +256,7 @@ upsert_release(
     release_status="SUCCESS",
     step_status="SUCCESS",
     endtime=get_current_datetime(),
-    type="WAITING_FOR_AVAILABILITY",
+    type="WAIT_FOR_AVAILABILITY",
     current_version_name=f"{model_name}",
     current_version_image=[
         f"modelArn: {create_model_response['ModelArn']}",
