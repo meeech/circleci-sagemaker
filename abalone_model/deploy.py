@@ -97,7 +97,7 @@ def upsert_release(
             "desired_replicas": 1,
             "images": current_version_image,
             "job_number": 7,
-            "name": current_version_name,
+            "name": current_version_name,  # this shows in the version column on releases page
             "pipeline_id": "fe37088f-9907-4172-b298-dfcbca78fb65",
             "workflow_id": "b9944239-8e68-448b-a7f9-d51e49deff8f",
         },
@@ -143,12 +143,15 @@ sagemaker_session = sagemaker.Session(
 
 
 # Get the latest approved model package of the model group in question
-model_package_arn = sagemaker_client.list_model_packages(
+latest_model_package = sagemaker_client.list_model_packages(
     ModelPackageGroupName=model_name,
     ModelApprovalStatus="Approved",
     SortBy="CreationTime",
     SortOrder="Descending",
-)["ModelPackageSummaryList"][0]["ModelPackageArn"]
+)["ModelPackageSummaryList"][0]
+
+model_package_arn = latest_model_package["ModelPackageArn"]
+model_package_version = latest_model_package["ModelPackageVersion"]
 
 # Get a list of existing models with model_name
 models_list = sagemaker_client.list_models(NameContains=model_name)["Models"]
@@ -190,6 +193,7 @@ print(
 # Get a list of existing endpoints with model_name
 endpoints_list = sagemaker_client.list_endpoints(NameContains=model_name)["Endpoints"]
 
+release_current_version_name = f"{model_name}-{model_package_version}"
 try:
     print(f"pre deploy - upsert_release {model_name}")
     upsert_release(
@@ -197,14 +201,12 @@ try:
         release_status="RUNNING",
         step_status="RUNNING",
         type="WAIT_FOR_AVAILABILITY",
-        current_version_name=f"{model_name}",
+        current_version_name=timed_model_name,
         current_version_image=[f"modelArn: {create_model_response['ModelArn']}"],
     )
 # TODO better error handling!
 except requests.exceptions.HTTPError as err:
     print(err)
-    raise
-
     if err.response.status_code == 400:
         # This is the create if it doesn't exist. Not perfect, but we infer from the 400
         # because we dont have a way for API to get this. just BFF
@@ -220,7 +222,7 @@ except requests.exceptions.HTTPError as err:
             release_status="RUNNING",
             step_status="RUNNING",
             type="WAIT_FOR_AVAILABILITY",
-            current_version_name=f"{model_name}",
+            current_version_name=timed_model_name,
             current_version_image=[f"modelArn: {create_model_response['ModelArn']}"],
         )
 
@@ -257,7 +259,7 @@ upsert_release(
     step_status="SUCCESS",
     endtime=get_current_datetime(),
     type="WAIT_FOR_AVAILABILITY",
-    current_version_name=f"{model_name}",
+    current_version_name=timed_model_name,
     current_version_image=[
         f"modelArn: {create_model_response['ModelArn']}",
         f"endpointArn: {endpoint_arn}",
@@ -268,7 +270,7 @@ print(f"upsert_component {model_name}")
 upsert_component(
     slug=f"sagemaker.{model_name}",
     display_name=f"sagemaker.{model_name}",
-    current_version_name=f"{timed_model_name}",
+    current_version_name={timed_model_name},
     current_version_image=endpoint_arn,
 )
 
