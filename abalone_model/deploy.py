@@ -185,6 +185,7 @@ print(
 endpoints_list = sagemaker_client.list_endpoints(NameContains=model_name)["Endpoints"]
 
 try:
+    print(f"pre deploy - upsert_release {model_name}")
     upsert_release(
         slug=model_name,
         release_status="RUNNING",
@@ -198,12 +199,22 @@ except requests.exceptions.HTTPError as err:
     if err.response.status_code == 400:
         # This is the create if it doesn't exist. Not perfect, but we infer from the 400
         # because we dont have a way for API to get this. just BFF
+        print(f"component doesnt exist, so creating {model_name}")
         upsert_component(
             slug=model_name,
             display_name=model_name,
             current_version_name="initialize",
             current_version_image="initialize",
         )
+        upsert_release(
+            slug=model_name,
+            release_status="RUNNING",
+            step_status="RUNNING",
+            type="WAITING_FOR_AVAILABILITY",
+            current_version_name=f"{model_name}-{create_model_response['ModelArn']}",
+            current_version_image="PENDING",
+        )
+
     else:
         print(f"HTTP error occurred with status code: {err.response.status_code}")
         print(err.response.text)
@@ -230,6 +241,7 @@ while describe_endpoint_response["EndpointStatus"] != "InService":
 endpoint_arn = create_update_endpoint_response["EndpointArn"]
 print(f"Created endpoint ARN: {endpoint_arn}")
 
+print(f"upsert_release {model_name}")
 upsert_release(
     slug=model_name,
     release_status="SUCCESS",
@@ -240,6 +252,7 @@ upsert_release(
     current_version_image=endpoint_arn,
 )
 
+print(f"upsert_component {model_name}")
 upsert_component(
     slug=model_name,
     display_name=model_name,
