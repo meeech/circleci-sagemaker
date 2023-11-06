@@ -104,7 +104,7 @@ def upsert_release(
         "type": "DEPLOYMENT",
     }
 
-    if endtime:
+    if endtime != None:
         data["steps"][0]["ended_at"] = endtime
 
     response = requests.put(url, headers=release_tracker_headers, data=json.dumps(data))
