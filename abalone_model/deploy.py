@@ -212,7 +212,7 @@ else:
 describe_endpoint_response = sagemaker_client.describe_endpoint(EndpointName=model_name)
 while describe_endpoint_response["EndpointStatus"] != "InService":
     print(describe_endpoint_response["EndpointStatus"])
-    sleep(60)
+    sleep(30)
     describe_endpoint_response = sagemaker_client.describe_endpoint(
         EndpointName=model_name
     )
