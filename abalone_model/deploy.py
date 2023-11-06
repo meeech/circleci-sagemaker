@@ -196,7 +196,7 @@ try:
         slug=f"sagemaker.{model_name}",
         release_status="RUNNING",
         step_status="RUNNING",
-        type="WAITING_FOR_AVAILABILITY",
+        type="WAIT_FOR_AVAILABILITY",
         current_version_name=f"{model_name}",
         current_version_image=[f"modelArn: {create_model_response['ModelArn']}"],
     )
