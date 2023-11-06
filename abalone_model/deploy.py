@@ -224,6 +224,7 @@ upsert_release(
     slug=model_name,
     release_status="SUCCESS",
     step_status="SUCCESS",
+    endtime=get_current_datetime(),
     type="WAITING_FOR_AVAILABILITY",
     current_version_name=f"{model_name}-{create_model_response['ModelArn']}",
     current_version_image=endpoint_arn,
