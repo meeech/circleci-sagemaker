@@ -89,7 +89,7 @@ def upsert_release(
         ],
         "target_version": {
             "desired_replicas": 1,
-            "images": [current_version_image],
+            "images": current_version_image,
             "job_number": 7,
             "name": current_version_name,
             "pipeline_id": "fe37088f-9907-4172-b298-dfcbca78fb65",
@@ -191,8 +191,8 @@ try:
         release_status="RUNNING",
         step_status="RUNNING",
         type="WAITING_FOR_AVAILABILITY",
-        current_version_name=f"{model_name}-{create_model_response['ModelArn']}",
-        current_version_image="PENDING",
+        current_version_name=f"{model_name}",
+        current_version_image=[f"modelArn: {create_model_response['ModelArn']}"],
     )
 # TODO better error handling!
 except requests.exceptions.HTTPError as err:
@@ -202,7 +202,7 @@ except requests.exceptions.HTTPError as err:
         print(f"component doesnt exist, so creating {model_name}")
         upsert_component(
             slug=f"sagemaker.{model_name}",
-            display_name=model_name,
+            display_name=f"sagemaker.{model_name}",
             current_version_name="initialize",
             current_version_image="initialize",
         )
@@ -211,8 +211,8 @@ except requests.exceptions.HTTPError as err:
             release_status="RUNNING",
             step_status="RUNNING",
             type="WAITING_FOR_AVAILABILITY",
-            current_version_name=f"{model_name}-{create_model_response['ModelArn']}",
-            current_version_image="PENDING",
+            current_version_name=f"{model_name}",
+            current_version_image=[f"modelArn: {create_model_response['ModelArn']}"],
         )
 
     else:
@@ -248,14 +248,17 @@ upsert_release(
     step_status="SUCCESS",
     endtime=get_current_datetime(),
     type="WAITING_FOR_AVAILABILITY",
-    current_version_name=f"{model_name}-{create_model_response['ModelArn']}",
-    current_version_image=endpoint_arn,
+    current_version_name=f"{model_name}",
+    current_version_image=[
+        f"modelArn: {create_model_response['ModelArn']}",
+        f"endpointArn: {endpoint_arn}",
+    ],
 )
 
 print(f"upsert_component {model_name}")
 upsert_component(
     slug=f"sagemaker.{model_name}",
-    display_name=model_name,
+    display_name=f"sagemaker.{model_name}",
     current_version_name=f"{timed_model_name}-{create_model_response['ModelArn']}",
     current_version_image=endpoint_arn,
 )
