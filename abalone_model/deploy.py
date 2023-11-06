@@ -102,6 +102,8 @@ def upsert_release(
         data["steps"][0]["ended_at"] = endtime
 
     response = requests.put(url, headers=release_tracker_headers, data=json.dumps(data))
+    response.raise_for_status()
+
     return response.status_code
 
 
@@ -182,22 +184,30 @@ print(
 # Get a list of existing endpoints with model_name
 endpoints_list = sagemaker_client.list_endpoints(NameContains=model_name)["Endpoints"]
 
-# TODO This is the create if it doesn't exist call
-upsert_component(
-    slug=model_name,
-    display_name=model_name,
-    current_version_name=f"first-release",
-    current_version_image=create_model_response["ModelArn"],
-)
+try:
+    upsert_release(
+        slug=model_name,
+        release_status="RUNNING",
+        step_status="RUNNING",
+        type="WAITING_FOR_AVAILABILITY",
+        current_version_name=f"{model_name}-{create_model_response['ModelArn']}",
+        current_version_image="PENDING",
+    )
+# TODO better error handling!
+except requests.exceptions.HTTPError as err:
+    if err.response.status_code == 400:
+        # This is the create if it doesn't exist. Not perfect, but we infer from the 400
+        # because we dont have a way for API to get this. just BFF
+        upsert_component(
+            slug=model_name,
+            display_name=model_name,
+            current_version_name="initialize",
+            current_version_image="initialize",
+        )
+    else:
+        print(f"HTTP error occurred with status code: {err.response.status_code}")
+        print(err.response.text)
 
-upsert_release(
-    slug=model_name,
-    release_status="RUNNING",
-    step_status="RUNNING",
-    type="WAITING_FOR_AVAILABILITY",
-    current_version_name=f"{model_name}-{create_model_response['ModelArn']}",
-    current_version_image="PENDING",
-)
 # Create or update the endpoint
 if endpoints_list:
     create_update_endpoint_response = sagemaker_client.update_endpoint(
