@@ -25,6 +25,9 @@ def get_current_datetime():
 # register the compenent with the release tracker
 # use this to update the current version
 def upsert_component(slug, display_name, current_version_name, current_version_image):
+    print(
+        f"slug: {slug}, display_name: {display_name}, current_version_name: {current_version_name}, current_version_image: {current_version_image}"
+    )
     url = f"{release_tracker_host}release-agent/v1/component"
     # we need to pass in the name,
     current_versions = [
@@ -72,6 +75,9 @@ def upsert_release(
     current_version_image,
     endtime=None,
 ):
+    print(
+        f"slug: {slug}, release_status: {release_status}, step_status: {step_status}, type: {type}, current_version_name: {current_version_name}, current_version_image: {current_version_image}, endtime: {endtime}"
+    )
     url = f"{release_tracker_host}release-agent/v1/release"
     data = {
         "command_id": "00000000-0000-0000-0000-000000000000",
