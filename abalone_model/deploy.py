@@ -187,7 +187,7 @@ endpoints_list = sagemaker_client.list_endpoints(NameContains=model_name)["Endpo
 try:
     print(f"pre deploy - upsert_release {model_name}")
     upsert_release(
-        slug=model_name,
+        slug=f"sagemaker.{model_name}",
         release_status="RUNNING",
         step_status="RUNNING",
         type="WAITING_FOR_AVAILABILITY",
@@ -201,13 +201,13 @@ except requests.exceptions.HTTPError as err:
         # because we dont have a way for API to get this. just BFF
         print(f"component doesnt exist, so creating {model_name}")
         upsert_component(
-            slug=model_name,
+            slug=f"sagemaker.{model_name}",
             display_name=model_name,
             current_version_name="initialize",
             current_version_image="initialize",
         )
         upsert_release(
-            slug=model_name,
+            slug=f"sagemaker.{model_name}",
             release_status="RUNNING",
             step_status="RUNNING",
             type="WAITING_FOR_AVAILABILITY",
@@ -243,7 +243,7 @@ print(f"Created endpoint ARN: {endpoint_arn}")
 
 print(f"upsert_release {model_name}")
 upsert_release(
-    slug=model_name,
+    slug=f"sagemaker.{model_name}",
     release_status="SUCCESS",
     step_status="SUCCESS",
     endtime=get_current_datetime(),
@@ -254,7 +254,7 @@ upsert_release(
 
 print(f"upsert_component {model_name}")
 upsert_component(
-    slug=model_name,
+    slug=f"sagemaker.{model_name}",
     display_name=model_name,
     current_version_name=f"{timed_model_name}-{create_model_response['ModelArn']}",
     current_version_image=endpoint_arn,
